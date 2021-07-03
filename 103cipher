@@ -1,0 +1,421 @@
+#!/usr/bin/env python3
+
+import math
+import sys
+
+
+def usage_displaying():
+    print("USAGE")
+    print("    ./103cipher message key flag")
+    print("DESCRIPTION")
+    print("    message     a message, made of ASCII characters")
+    print("    key         the encryption key, made of ASCII characters")
+    print("    flag        0 for the message to be encrypted, 1 to be decrypted")
+    sys.exit(0)
+
+
+def error_handling_input(i, argv):
+    if (i == 2):
+        if (argv[1][0] == '-' and argv[1][1] == 'h'):
+            usage_displaying()
+        else:
+            sys.exit(84)
+    elif (i > 4 or i < 4):
+        sys.exit(84)
+    elif (i == 4):
+        try:
+            code_int = int(argv[3])
+        except ValueError:
+            print("Unable to parse code as an integer")
+            sys.exit(84)
+        if (int(argv[3]) > 1 or int(argv[3]) < 0):
+            sys.exit(84)
+
+
+def key_matix(argv, width):
+    x = 0
+    arr = []
+    y = width * width
+
+    for i in argv[2]:
+        arr.append(ord(i))
+        x += 1
+    while (x % width != 0 or x == 0 or x != y):
+        arr.append(0)
+        x += 1
+    return arr
+
+
+def calc_width_of_matrix(argv):
+    if (len(argv[2]) > 9 and len(argv[2]) <= 16):
+        i = 4
+    elif (len(argv[2]) > 4 and len(argv[2]) <= 9):
+        i = 3
+    elif (len(argv[2]) <= 4 and len(argv[2]) > 1):
+        i = 2
+    elif (len(argv[2]) <= 1 and len(argv[2]) >= 0):
+        i = 1
+    return i
+
+
+def message_matrix(argv, width):
+    x = 0
+    arr = []
+    y = width * width
+
+    for i in argv[1]:
+        arr.append(ord(i))
+        x += 1
+    while (x % width != 0):
+        arr.append(0)
+        x += 1
+    return arr
+
+
+def display_encryption(matrix_key, en_message, width):
+    print("Key matrix:")
+    if (width == 4):
+        print('{:8}'.format(str(matrix_key[0])) + '{:8}'.format(str(matrix_key[1])) + '{:8}'.format(
+            str(matrix_key[2])) + str(matrix_key[3]))
+        print('{:8}'.format(str(matrix_key[4])) + '{:8}'.format(str(matrix_key[5])) + '{:8}'.format(
+            str(matrix_key[6])) + str(matrix_key[7]))
+        print('{:8}'.format(str(matrix_key[8])) + '{:8}'.format(str(matrix_key[9])) + '{:8}'.format(
+            str(matrix_key[10])) + str(matrix_key[11]))
+        print('{:8}'.format(str(matrix_key[12])) + '{:8}'.format(str(matrix_key[13])) + '{:8}'.format(
+            str(matrix_key[14])) + str(matrix_key[15]) + "\n")
+    if (width == 3):
+        print('{:8}'.format(str(matrix_key[0])) + '{:8}'.format(str(matrix_key[1])) + str(matrix_key[2]))
+        print('{:8}'.format(str(matrix_key[3])) + '{:8}'.format(str(matrix_key[4])) + str(matrix_key[5]))
+        print('{:8}'.format(str(matrix_key[6])) + '{:8}'.format(str(matrix_key[7])) + str(matrix_key[8]) + "\n")
+    elif (width == 2):
+        print('{:8}'.format(str(matrix_key[0])) + str(matrix_key[1]))
+        print('{:8}'.format(str(matrix_key[2])) + str(matrix_key[3]) + "\n")
+    elif (width == 1):
+        print(str(matrix_key[0]) + "\n")
+
+    print("Encrypted message:")
+    last = len(en_message)
+    check = 0
+    for i in en_message:
+        check += 1
+        if (check == last):
+            print(str(i))
+        else:
+            print(str(i) + " ", end='')
+
+
+def encryption(argv):
+    en_message = []
+    width = calc_width_of_matrix(argv)
+    matrix_key = key_matix(argv, width)
+    matrix_message = message_matrix(argv, width)
+    times = len(matrix_message) / 3 * len(matrix_key) / 3
+    x = 0
+    y = 0
+    z = 0
+    t = 0
+    digit = 0
+
+    while (len(matrix_message) / width > z):
+        while (x < width):
+            while (y < width):
+                digit = digit + int(matrix_key[x + y * width]) * matrix_message[t]
+                y += 1
+                t += 1
+            if (z == 0):
+                t = 0
+            else:
+                t = z * width
+            en_message.append(digit)
+            digit = 0
+            y = 0
+            x += 1
+        x = 0
+        z += 1
+        t += width
+    display_encryption(matrix_key, en_message, width)
+
+
+def message_matrix_de(argv, width):
+    x = 0
+    arr = []
+    temp = argv[1].split()
+    y = width * width
+
+    for i in temp:
+        try:
+            code_int = int(i)
+        except ValueError:
+            print("Unable to parse code as an integer")
+            sys.exit(84)
+        arr.append(int(i))
+        x += 1
+    while (x % width != 0):
+        arr.append(0)
+        x += 1
+    return arr
+
+
+def display_decryption(matrix_key, en_message, width):
+    print("Key matrix:")
+    if (width == 4):
+        print('{:8}'.format('{:.3f}'.format(matrix_key[0])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[1])) + '{:8}'.format('{:.3f}'.format(matrix_key[2])) + '{:.3f}'.format(
+            matrix_key[3]))
+        print('{:8}'.format('{:.3f}'.format(matrix_key[4])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[5])) + '{:8}'.format('{:.3f}'.format(matrix_key[6])) + '{:.3f}'.format(
+            matrix_key[7]))
+        print('{:8}'.format('{:.3f}'.format(matrix_key[8])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[9])) + '{:8}'.format('{:.3f}'.format(matrix_key[10])) + '{:.3f}'.format(
+            matrix_key[11]))
+        print('{:8}'.format('{:.3f}'.format(matrix_key[12])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[13])) + '{:8}'.format('{:.3f}'.format(matrix_key[14])) + '{:.3f}'.format(
+            matrix_key[15]) + "\n")
+    elif (width == 3):
+        print('{:8}'.format('{:.3f}'.format(matrix_key[0])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[1])) + '{:.3f}'.format(matrix_key[2]))
+        print('{:8}'.format('{:.3f}'.format(matrix_key[3])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[4])) + '{:.3f}'.format(matrix_key[5]))
+        print('{:8}'.format('{:.3f}'.format(matrix_key[6])) + '{:8}'.format(
+            '{:.3f}'.format(matrix_key[7])) + '{:.3f}'.format(matrix_key[8]) + "\n")
+    elif (width == 2):
+        print('{:8}'.format(str(matrix_key[0])) + str(matrix_key[1]))
+        print('{:8}'.format(str(matrix_key[2])) + str(matrix_key[3]) + "\n")
+    elif (width == 1):
+        print(str(matrix_key[0]) + "\n")
+
+    print("Decrypted message:")
+    last = len(en_message)
+    check = 0
+    for i in en_message:
+        if (check == last - 1 and en_message[check] >= 32 and en_message[check] <= 127):
+            print(str(chr(i)))
+            break
+        elif (en_message[check] > 127):
+            sys.exit(84)
+        elif (en_message[check] >= 32 and check < last and en_message[check + 1] >= 32 and en_message[check] <= 127):
+            print(str(chr(i)), end='')
+        elif (en_message[check] >= 32 and check < last and en_message[check + 1] < 32 and en_message[check] <= 127):
+            print(str(chr(i)))
+            break
+        check += 1
+
+
+def inverse_key_three(arr, new_arr, det):
+    x1 = ((arr[4] * arr[8]) - (arr[7] * arr[5])) * 1 / det
+    y1 = ((arr[1] * arr[8]) - (arr[7] * arr[2])) * -1 * 1 / det
+    z1 = ((arr[1] * arr[5]) - (arr[2] * arr[4])) * 1 / det
+    x2 = ((arr[3] * arr[8]) - (arr[5] * arr[6])) * -1 * 1 / det
+    y2 = ((arr[0] * arr[8]) - (arr[6] * arr[2])) * 1 / det
+    z2 = ((arr[0] * arr[5]) - (arr[2] * arr[3])) * -1 * 1 / det
+    x3 = ((arr[3] * arr[7]) - (arr[6] * arr[4])) * 1 / det
+    y3 = ((arr[0] * arr[7]) - (arr[1] * arr[6])) * -1 * 1 / det
+    z3 = ((arr[0] * arr[4]) - (arr[1] * arr[3])) * 1 / det
+    new_arr = [x1, y1, z1, x2, y2, z2, x3, y3, z3]
+    return new_arr
+
+
+def choose_arr(arr, i):
+    new_arr = []
+
+    if (i == 0):
+        new_arr.append(arr[5])
+        new_arr.append(arr[6])
+        new_arr.append(arr[7])
+        new_arr.append(arr[9])
+        new_arr.append(arr[10])
+        new_arr.append(arr[11])
+        new_arr.append(arr[13])
+        new_arr.append(arr[14])
+        new_arr.append(arr[15])
+    if (i == 1):
+        new_arr.append(arr[4])
+        new_arr.append(arr[6])
+        new_arr.append(arr[7])
+        new_arr.append(arr[8])
+        new_arr.append(arr[10])
+        new_arr.append(arr[11])
+        new_arr.append(arr[12])
+        new_arr.append(arr[14])
+        new_arr.append(arr[15])
+    if (i == 2):
+        new_arr.append(arr[4])
+        new_arr.append(arr[5])
+        new_arr.append(arr[7])
+        new_arr.append(arr[8])
+        new_arr.append(arr[9])
+        new_arr.append(arr[11])
+        new_arr.append(arr[12])
+        new_arr.append(arr[13])
+        new_arr.append(arr[15])
+    if (i == 3):
+        new_arr.append(arr[4])
+        new_arr.append(arr[5])
+        new_arr.append(arr[6])
+        new_arr.append(arr[8])
+        new_arr.append(arr[9])
+        new_arr.append(arr[10])
+        new_arr.append(arr[12])
+        new_arr.append(arr[13])
+        new_arr.append(arr[14])
+
+    det = (new_arr[0] * new_arr[4] * new_arr[8]) + (new_arr[1] * new_arr[5] * new_arr[6]) + (
+                new_arr[2] * new_arr[3] * new_arr[7]) - (new_arr[6] * new_arr[4] * new_arr[2]) - (
+                      new_arr[7] * new_arr[5] * new_arr[0]) - (new_arr[8] * new_arr[3] * new_arr[1])
+    return det
+
+
+def get_new_det(arr):
+    det = 0
+    for i in range(4):
+        det = det + int(choose_arr(arr, i)) * math.pow(-1, i)
+    return det
+
+
+def calc_four_times_four_matrix(arr):
+    inv = []
+    inv.append(
+        arr[5] * arr[10] * arr[15] - arr[5] * arr[11] * arr[14] - arr[9] * arr[6] * arr[15] + arr[9] * arr[7] * arr[
+            14] + arr[13] * arr[6] * arr[11] - arr[13] * arr[7] * arr[10])
+    inv.append(
+        -arr[1] * arr[10] * arr[15] + arr[1] * arr[11] * arr[14] + arr[9] * arr[2] * arr[15] - arr[9] * arr[3] * arr[
+            14] - arr[13] * arr[2] * arr[11] + arr[13] * arr[3] * arr[10])
+    inv.append(
+        arr[1] * arr[6] * arr[15] - arr[1] * arr[7] * arr[14] - arr[5] * arr[2] * arr[15] + arr[5] * arr[3] * arr[14] +
+        arr[13] * arr[2] * arr[7] - arr[13] * arr[3] * arr[6])
+    inv.append(
+        -arr[1] * arr[6] * arr[11] + arr[1] * arr[7] * arr[10] + arr[5] * arr[2] * arr[11] - arr[5] * arr[3] * arr[10] -
+        arr[9] * arr[2] * arr[7] + arr[9] * arr[3] * arr[6])
+    inv.append(
+        -arr[4] * arr[10] * arr[15] + arr[4] * arr[11] * arr[14] + arr[8] * arr[6] * arr[15] - arr[8] * arr[7] * arr[
+            14] - arr[12] * arr[6] * arr[11] + arr[12] * arr[7] * arr[10])
+    inv.append(
+        arr[0] * arr[10] * arr[15] - arr[0] * arr[11] * arr[14] - arr[8] * arr[2] * arr[15] + arr[8] * arr[3] * arr[
+            14] + arr[12] * arr[2] * arr[11] - arr[12] * arr[3] * arr[10])
+    inv.append(
+        -arr[0] * arr[6] * arr[15] + arr[0] * arr[7] * arr[14] + arr[4] * arr[2] * arr[15] - arr[4] * arr[3] * arr[14] -
+        arr[12] * arr[2] * arr[7] + arr[12] * arr[3] * arr[6])
+    inv.append(
+        arr[0] * arr[6] * arr[11] - arr[0] * arr[7] * arr[10] - arr[4] * arr[2] * arr[11] + arr[4] * arr[3] * arr[10] +
+        arr[8] * arr[2] * arr[7] - arr[8] * arr[3] * arr[6])
+    inv.append(
+        arr[4] * arr[9] * arr[15] - arr[4] * arr[11] * arr[13] - arr[8] * arr[5] * arr[15] + arr[8] * arr[7] * arr[13] +
+        arr[12] * arr[5] * arr[11] - arr[12] * arr[7] * arr[9])
+    inv.append(
+        -arr[0] * arr[9] * arr[15] + arr[0] * arr[11] * arr[13] + arr[8] * arr[1] * arr[15] - arr[8] * arr[3] * arr[
+            13] - arr[12] * arr[1] * arr[11] + arr[12] * arr[3] * arr[9])
+    inv.append(
+        arr[0] * arr[5] * arr[15] - arr[0] * arr[7] * arr[13] - arr[4] * arr[1] * arr[15] + arr[4] * arr[3] * arr[13] +
+        arr[12] * arr[1] * arr[7] - arr[12] * arr[3] * arr[5])
+    inv.append(
+        -arr[0] * arr[5] * arr[11] + arr[0] * arr[7] * arr[9] + arr[4] * arr[1] * arr[11] - arr[4] * arr[3] * arr[9] -
+        arr[8] * arr[1] * arr[7] + arr[8] * arr[3] * arr[5])
+    inv.append(
+        -arr[4] * arr[9] * arr[14] + arr[4] * arr[10] * arr[13] + arr[8] * arr[5] * arr[14] - arr[8] * arr[6] * arr[
+            13] - arr[12] * arr[5] * arr[10] + arr[12] * arr[6] * arr[9])
+    inv.append(
+        arr[0] * arr[9] * arr[14] - arr[0] * arr[10] * arr[13] - arr[8] * arr[1] * arr[14] + arr[8] * arr[2] * arr[13] +
+        arr[12] * arr[1] * arr[10] - arr[12] * arr[2] * arr[9])
+    inv.append(
+        -arr[0] * arr[5] * arr[14] + arr[0] * arr[6] * arr[13] + arr[4] * arr[1] * arr[14] - arr[4] * arr[2] * arr[13] -
+        arr[12] * arr[1] * arr[6] + arr[12] * arr[2] * arr[5])
+    inv.append(
+        arr[0] * arr[5] * arr[10] - arr[0] * arr[6] * arr[9] - arr[4] * arr[1] * arr[10] + arr[4] * arr[2] * arr[9] +
+        arr[8] * arr[1] * arr[6] - arr[8] * arr[2] * arr[5])
+    return inv
+
+
+def inverse_key(arr, width):
+    new_arr = []
+
+    if (width == 4):
+        new_arr = calc_four_times_four_matrix(arr)
+        det = arr[0] * new_arr[0] + arr[1] * new_arr[4] + arr[2] * new_arr[8] + arr[3] * new_arr[12]
+        for i in range(16):
+            new_arr[i] = new_arr[i] * 1 / det
+    elif (width == 3):
+        det = (arr[0] * arr[4] * arr[8]) + (arr[1] * arr[5] * arr[6]) + (arr[2] * arr[3] * arr[7]) - (
+                    arr[6] * arr[4] * arr[2]) - (arr[7] * arr[5] * arr[0]) - (arr[8] * arr[3] * arr[1])
+    elif (width == 2):
+        det = (arr[3] * arr[0]) - (arr[2] * arr[1])
+    elif (width == 1):
+        det = arr[0]
+
+    if (det == 0):
+        sys.exit(84)
+    else:
+        if (width == 4):
+            x = 0
+        elif (width == 3):
+            new_arr = inverse_key_three(arr, new_arr, det)
+        elif (width == 2):
+            new_arr.append(1 / det * arr[3])
+            new_arr.append(1 / det * arr[1] * -1)
+            new_arr.append(1 / det * arr[2] * -1)
+            new_arr.append(1 / det * arr[0])
+        elif (width == 1):
+            new_arr.append(1 / arr[0])
+    return new_arr
+
+
+def count_value(matrix_message):
+    p = 0
+    for i in matrix_message:
+        if (i != 0):
+            p += 1
+    return p
+
+def decryption(argv):
+    en_message = []
+    width = calc_width_of_matrix(argv)
+    matrix_key = inverse_key(key_matix(argv, width), width)
+    matrix_message = message_matrix_de(argv, width)
+    p = count_value(matrix_message)
+    x = 0
+    y = 0
+    z = 0
+    t = 0
+    digit = 0
+    counter = 0
+
+    for i in matrix_key:
+        if ('{:.3f}'.format(matrix_key[counter]) == "0.000" or '{:.3f}'.format(matrix_key[counter]) == "-0.000"):
+            matrix_key[counter] = 0
+        counter += 1
+
+    while (len(matrix_message) / width > z):
+        while (x < width):
+            while (y < width):
+                digit = float(digit) + float(matrix_key[x + y * width]) * float(matrix_message[t])
+                y += 1
+                t += 1
+            if (z == 0):
+                t = 0
+            else:
+                t = z * width
+            p -= 1
+            if (digit < 31 and digit != 0 and p > 0):
+                sys.exit(84)
+            en_message.append(round(digit))
+            digit = 0
+            y = 0
+            x += 1
+        x = 0
+        z += 1
+        t += width
+    display_decryption(matrix_key, en_message, width)
+
+
+def main(argv):
+    error_handling_input(len(argv), argv)
+    if (argv[3] == str(1)):
+        if (len(argv[1]) == 0):
+            sys.exit(84)
+        decryption(argv)
+    elif (argv[3] == str(0)):
+        encryption(argv)
+    return 0
+
+
+if __name__ == '__main__':
+    main(sys.argv)
